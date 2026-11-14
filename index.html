@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Monster Feast - מפלצת רעבה</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Color+Emoji&family=Rubik:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <!-- Particle FX Canvas Overlay -->
+    <canvas id="fx-canvas" class="fx-canvas" aria-hidden="true"></canvas>
+
+    <!-- Floating Drag Layer -->
+    <div id="drag-layer" class="drag-layer" aria-hidden="true"></div>
+
+    <!-- Screen 1: Title -->
+    <section id="screen-title" class="screen screen-title active" aria-label="מסך פתיחה">
+      <div class="bg-decor" aria-hidden="true">
+        <span class="cloud cloud-1"></span>
+        <span class="cloud cloud-2"></span>
+        <span class="hill hill-1"></span>
+        <span class="hill hill-2"></span>
+      </div>
+
+      <div class="title-content">
+        <header class="title-header">
+          <div class="logo-badge" dir="ltr" lang="en">
+            <span class="logo-word logo-monster">MONSTER</span>
+            <span class="logo-word logo-feast">FEAST</span>
+          </div>
+          <p class="title-subtitle">האכילו את המפלצת באנגלית!</p>
+        </header>
+
+        <div class="title-stage">
+          <div id="title-monster-slot" class="monster-showcase" role="button" tabindex="0" aria-label="לחץ על המפלצת"></div>
+        </div>
+
+        <div class="title-actions">
+          <button id="btn-play" class="btn btn-primary btn-play" type="button">
+            <span class="btn-icon" aria-hidden="true">▶</span>
+            <span class="btn-text">שחקו!</span>
+          </button>
+
+          <div class="title-secondary-row">
+            <button id="btn-monsters" class="btn btn-secondary btn-pill" type="button">
+              <span class="btn-icon" aria-hidden="true">🥚</span>
+              <span class="btn-text">מפלצות</span>
+            </button>
+            <button id="btn-settings" class="btn btn-secondary btn-pill" type="button">
+              <span class="btn-icon" aria-hidden="true">⚙️</span>
+              <span class="btn-text">הגדרות</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 2: Stage Map -->
+    <section id="screen-map" class="screen screen-map" aria-label="מפת שלבים">
+      <header class="top-bar">
+        <button id="btn-map-back" class="btn btn-icon-only" type="button" aria-label="חזרה">
+          <span aria-hidden="true">➜</span>
+        </button>
+        <h1 class="top-title">בחרו שלב</h1>
+        <div class="top-pills">
+          <button id="btn-map-monsters" class="pill-stat pill-btn" type="button" aria-label="מפלצות">
+            <span aria-hidden="true">👾</span>
+            <span id="map-monster-name">גוגו</span>
+          </button>
+          <div class="pill-stat pill-treats" aria-label="חטיפים">
+            <span aria-hidden="true">🍬</span>
+            <span id="map-treats-count">0</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="map-scroll">
+        <div id="stage-map-grid" class="stage-map-grid"></div>
+      </div>
+    </section>
+
+    <!-- Screen 3: Feast -->
+    <section id="screen-feast" class="screen screen-feast" aria-label="האכלת המפלצת">
+      <header class="feast-hud">
+        <div class="hud-right">
+          <button id="btn-pause" class="btn btn-icon-only btn-hud" type="button" aria-label="השהה">
+            <span aria-hidden="true">⏸</span>
+          </button>
+          <div id="hud-plates" class="hud-plates" aria-label="הזמנות בשלב"></div>
+        </div>
+
+        <div class="hud-center">
+          <div class="growth-bar-wrap" aria-label="מד שובע">
+            <span class="growth-icon" aria-hidden="true">😋</span>
+            <div class="growth-track">
+              <div id="hud-growth-fill" class="growth-fill" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hud-left">
+          <div class="pill-stat pill-treats">
+            <span aria-hidden="true">🍬</span>
+            <span id="hud-treats-count">0</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="feast-arena">
+        <!-- Monster + Speech Bubble + Serving Plate -->
+        <div class="monster-zone">
+          <button id="speech-bubble" class="speech-bubble" type="button" dir="ltr" lang="en" aria-label="השמע בקשה">
+            <span class="bubble-speaker" aria-hidden="true">🔊</span>
+            <span id="speech-text" class="bubble-text"></span>
+            <span class="bubble-listen-only" aria-hidden="true">הקשיבו היטב!</span>
+          </button>
+
+          <div class="monster-stage-wrap">
+            <div id="feast-monster-slot" class="feast-monster-slot" role="button" tabindex="0" aria-label="המפלצת - לחץ לשמוע שוב"></div>
+            <div id="mouth-drop-hint" class="mouth-drop-hint" aria-hidden="true"></div>
+          </div>
+
+          <div id="serving-station" class="serving-station hidden">
+            <div id="serving-plate" class="serving-plate" aria-label="צלחת הגשה">
+              <div id="plate-items" class="plate-items"></div>
+              <span class="plate-placeholder">גררו לכאן</span>
+            </div>
+            <button id="btn-bell" class="btn-bell" type="button" aria-label="צלצל בפעמון - סיימתי">
+              <span class="bell-emoji" aria-hidden="true">🔔</span>
+              <span class="bell-label">סיימתי!</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Wooden Food Table / Tray -->
+        <div class="table-zone">
+          <div class="wooden-table">
+            <div class="table-lip" aria-hidden="true"></div>
+            <div id="food-tray" class="food-tray" role="list" aria-label="מגש אוכל"></div>
+          </div>
+        </div>
+      </main>
+    </section>
+
+    <!-- Screen 4: Pause Modal -->
+    <div id="screen-pause" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="משחק מושהה">
+      <div class="modal-card pause-card">
+        <h2 class="modal-title">הפסקה קטנה</h2>
+        <div class="pause-quick-toggles">
+          <button id="btn-pause-sound" class="btn btn-toggle-chip" type="button">🔊 צלילים</button>
+          <button id="btn-pause-music" class="btn btn-toggle-chip" type="button">🎵 מוזיקה</button>
+        </div>
+        <div class="modal-actions">
+          <button id="btn-resume" class="btn btn-primary" type="button">המשך</button>
+          <button id="btn-restart" class="btn btn-secondary" type="button">התחל שלב מחדש</button>
+          <button id="btn-pause-map" class="btn btn-ghost" type="button">חזרה למפה</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 5: Results -->
+    <section id="screen-results" class="screen screen-results" aria-label="תוצאות השלב">
+      <div class="results-card">
+        <h1 id="results-heading" class="results-heading">כל הכבוד!</h1>
+
+        <div class="results-stars" id="results-stars" aria-label="כוכבים">
+          <span class="res-star" data-star="1">★</span>
+          <span class="res-star" data-star="2">★</span>
+          <span class="res-star" data-star="3">★</span>
+        </div>
+
+        <div id="results-monster-slot" class="results-monster-slot"></div>
+
+        <div class="results-treats-banner">
+          <span aria-hidden="true">🍬</span>
+          <span id="results-treats-earned">+6 חטיפים!</span>
+        </div>
+
+        <div class="results-sentences-wrap">
+          <p class="results-sentences-title">המשפטים שלמדנו (לחצו לשמוע שוב):</p>
+          <div id="results-sentences" class="results-sentences"></div>
+        </div>
+
+        <div class="results-actions">
+          <button id="btn-results-next" class="btn btn-primary hidden" type="button">שלב הבא! ➜</button>
+          <button id="btn-results-again" class="btn btn-secondary" type="button">שחקו שוב</button>
+          <button id="btn-results-map" class="btn btn-ghost" type="button">למפה</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 6: Monsters Collection -->
+    <section id="screen-monsters" class="screen screen-monsters" aria-label="אוסף מפלצות">
+      <header class="top-bar">
+        <button id="btn-monsters-back" class="btn btn-icon-only" type="button" aria-label="חזרה">
+          <span aria-hidden="true">➜</span>
+        </button>
+        <h1 class="top-title">המפלצות שלי</h1>
+        <div class="pill-stat pill-treats">
+          <span aria-hidden="true">🍬</span>
+          <span id="monsters-treats-count">0</span>
+        </div>
+      </header>
+
+      <div class="monsters-scroll">
+        <div id="monsters-grid" class="monsters-grid"></div>
+      </div>
+    </section>
+
+    <!-- Screen 7: Settings -->
+    <section id="screen-settings" class="screen screen-settings" aria-label="הגדרות">
+      <header class="top-bar">
+        <button id="btn-settings-back" class="btn btn-icon-only" type="button" aria-label="חזרה">
+          <span aria-hidden="true">➜</span>
+        </button>
+        <h1 class="top-title">הגדרות</h1>
+        <div class="top-spacer"></div>
+      </header>
+
+      <div class="settings-list">
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-icon" aria-hidden="true">🔊</span>
+            <div>
+              <div class="setting-label">אפקטים קוליים</div>
+              <div class="setting-desc">לעיסות, פעמון וצלילי משחק</div>
+            </div>
+          </div>
+          <button id="toggle-sound" class="switch-btn" type="button" role="switch" aria-checked="true"></button>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-icon" aria-hidden="true">🎵</span>
+            <div>
+              <div class="setting-label">מוזיקת רקע</div>
+              <div class="setting-desc">מנגינה שמחה ברקע</div>
+            </div>
+          </div>
+          <button id="toggle-music" class="switch-btn" type="button" role="switch" aria-checked="true"></button>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-icon" aria-hidden="true">🐢</span>
+            <div>
+              <div class="setting-label">מהירות דיבור</div>
+              <div class="setting-desc">איטי יותר עוזר להבין כל מילה</div>
+            </div>
+          </div>
+          <div class="segmented-ctrl" role="group" aria-label="מהירות דיבור">
+            <button id="speed-normal" class="seg-btn active" type="button" data-speed="normal">רגיל</button>
+            <button id="speed-slow" class="seg-btn" type="button" data-speed="slow">איטי</button>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-icon" aria-hidden="true">👂</span>
+            <div>
+              <div class="setting-label">מצב האזנה בלבד</div>
+              <div class="setting-desc">הסתרת הטקסט בבועה לתרגול שמיעה</div>
+            </div>
+          </div>
+          <button id="toggle-listen" class="switch-btn" type="button" role="switch" aria-checked="false"></button>
+        </div>
+
+        <div class="setting-row setting-danger">
+          <div class="setting-info">
+            <span class="setting-icon" aria-hidden="true">🗑️</span>
+            <div>
+              <div class="setting-label">איפוס התקדמות</div>
+              <div class="setting-desc">מחיקת כוכבים, חטיפים ומפלצות</div>
+            </div>
+          </div>
+          <button id="btn-reset-progress" class="btn btn-danger" type="button">איפוס</button>
+        </div>
+      </div>
+
+      <!-- Custom Confirm Reset Modal -->
+      <div id="reset-confirm-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="אישור איפוס">
+        <div class="modal-card confirm-card">
+          <h2 class="modal-title">לאפס את כל ההתקדמות?</h2>
+          <p class="confirm-body">כל הכוכבים, החטיפים והמפלצות שבקעו יימחקו.</p>
+          <div class="modal-actions modal-actions-row">
+            <button id="btn-reset-cancel" class="btn btn-secondary" type="button">לא, ביטול</button>
+            <button id="btn-reset-confirm" class="btn btn-danger" type="button">כן, אפס הכל</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
