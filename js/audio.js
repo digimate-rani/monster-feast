@@ -237,20 +237,30 @@ export function speak(text, options = {}) {
   // Check audio/manifest.json exact match
   const clipPath = manifest[text] || manifest[text.toLowerCase()];
   if (clipPath) {
+    // A manifest value is one file, or a list of files played back to back (long "and" orders).
+    const files = Array.isArray(clipPath) ? clipPath : [clipPath];
+    // Each monster sounds different: shift pitch by playing faster/slower without pitch correction.
+    const rate = (1 + (pitch - 1) * 0.5) * (isSlow ? 0.85 : 1.0);
+    const fail = () => {
+      setMusicDuck(false);
+      speakWithSynth(text, pitch, isSlow);
+    };
+    const playPart = (i) => {
+      const audio = new Audio(`audio/clips/${files[i]}`);
+      currentClipAudio = audio;
+      audio.preservesPitch = false;
+      audio.playbackRate = rate;
+      audio.onended = () => {
+        if (currentClipAudio !== audio) return;
+        if (i + 1 < files.length) playPart(i + 1);
+        else setMusicDuck(false);
+      };
+      audio.onerror = fail;
+      audio.play().catch(fail);
+    };
     try {
       setMusicDuck(true);
-      const audio = new Audio(`audio/clips/${clipPath}`);
-      currentClipAudio = audio;
-      audio.playbackRate = isSlow ? 0.8 : 1.0;
-      audio.onended = () => setMusicDuck(false);
-      audio.onerror = () => {
-        setMusicDuck(false);
-        speakWithSynth(text, pitch, isSlow);
-      };
-      audio.play().catch(() => {
-        setMusicDuck(false);
-        speakWithSynth(text, pitch, isSlow);
-      });
+      playPart(0);
       return;
     } catch {
       setMusicDuck(false);
